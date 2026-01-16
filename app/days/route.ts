@@ -68,9 +68,16 @@ function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string 
         const rows = 80;
         const cols = 52;
         const gap = (width > 1000) ? 6 : 3;
-        const cellSize = (contentWidth - (cols - 1) * gap) / cols;
+
+        // Calculate size to fit BOTH width and height
+        const availableW = contentWidth - (cols - 1) * gap;
+        const availableH = contentHeight - (rows - 1) * gap;
+        const cellSize = Math.min(availableW / cols, availableH / rows);
+
+        const actualW = cols * cellSize + (cols - 1) * gap;
         const actualH = rows * cellSize + (rows - 1) * gap;
-        const gridX = (width - contentWidth) / 2;
+
+        const gridX = (width - actualW) / 2;
         const gridY = offsetTop + (contentHeight - actualH) / 2;
 
         for (let i = 0; i < rows * cols; i++) {
@@ -86,10 +93,17 @@ function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string 
     } else if (type === 'year') {
         const cols = 15;
         const rows = 25;
-        const gap = (width > 1000) ? 8 : 4;
-        const cellSize = (contentWidth - (cols - 1) * gap) / cols;
+        const gap = (width > 1000) ? 10 : 5;
+
+        // Calculate size to fit BOTH width and height
+        const availableW = contentWidth - (cols - 1) * gap;
+        const availableH = contentHeight - (rows - 1) * gap;
+        const cellSize = Math.min(availableW / cols, availableH / rows);
+
+        const actualW = cols * cellSize + (cols - 1) * gap;
         const actualH = rows * cellSize + (rows - 1) * gap;
-        const gridX = (width - contentWidth) / 2;
+
+        const gridX = (width - actualW) / 2;
         const gridY = offsetTop + (contentHeight - actualH) / 2;
 
         for (let i = 0; i < data.total; i++) {
@@ -101,7 +115,7 @@ function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string 
             const color = isElapsed ? p.primary : '#1c1c1e';
             svgContent += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="${cellSize / 4}" fill="${color}" opacity="${isElapsed ? 1 : 0.4}" ${isElapsed && i % 40 === 0 ? 'filter="url(#soft-glow)"' : ''} />`;
         }
-        svgContent += `<text x="${width / 2}" y="${gridY - 120}" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="900" font-size="${width / 10}" fill="white" letter-spacing="-2">${data.label}</text>`;
+        svgContent += `<text x="${width / 2}" y="${gridY - (width / 15)}" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="900" font-size="${width / 11}" fill="white" letter-spacing="-1">${data.label}</text>`;
     } else if (type === 'goal') {
         const cx = width / 2;
         const cy = offsetTop + contentHeight / 2;
