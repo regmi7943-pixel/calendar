@@ -5,17 +5,7 @@ import { useState, useEffect } from "react";
 
 type CalendarType = 'life' | 'year' | 'goal';
 
-const IPHONE_MODELS = [
-    { id: 'iphone_14_15_promax', name: 'iPhone 15 / 15 Pro / 16', w: 1290, h: 2796 },
-    { id: 'iphone_14_15_pro', name: 'iPhone 14 / 15', w: 1179, h: 2556 },
-    { id: 'iphone_12_14_max', name: 'iPhone 12 / 13 / 14 Pro Max', w: 1284, h: 2778 },
-    { id: 'iphone_12_14', name: 'iPhone 12 / 13 / 14', w: 1170, h: 2532 },
-    { id: 'iphone_xsmax_11promax', name: 'iPhone XS Max / 11 Pro Max', w: 1242, h: 2688 },
-    { id: 'iphone_xr_11', name: 'iPhone XR / 11', w: 828, h: 1792 },
-    { id: 'iphone_x_11pro', name: 'iPhone X / XS / 11 Pro', w: 1125, h: 2436 },
-    { id: 'iphone_6_8_plus', name: 'iPhone 6 Plus / 7 Plus / 8 Plus', w: 1242, h: 2208 },
-    { id: 'iphone_6_8', name: 'iPhone 6 / 7 / 8', w: 750, h: 1334 },
-];
+const IPHONE_6_SPEC = { id: 'iphone_6_8', name: 'iPhone 6 / 7 / 8', w: 750, h: 1334 };
 
 export default function Home() {
     const [origin, setOrigin] = useState("");
@@ -30,7 +20,7 @@ export default function Home() {
     const [goalMonth, setGoalMonth] = useState('12');
     const [goalDay, setGoalDay] = useState('31');
 
-    const [device, setDevice] = useState('iphone_14_15_promax');
+    const [device, setDevice] = useState('iphone_6_8');
 
     useEffect(() => {
         setOrigin(window.location.origin);
@@ -41,8 +31,7 @@ export default function Home() {
 
     const getPreviewUrl = (type: CalendarType) => {
         if (!origin) return '';
-        const model = IPHONE_MODELS.find(m => m.id === device) || IPHONE_MODELS[0];
-        return `${origin}/days?type=${type}&width=${model.w}&height=${model.h}&dob=${dob}&goalDate=${goalDate}`;
+        return `${origin}/days?type=${type}&width=${IPHONE_6_SPEC.w}&height=${IPHONE_6_SPEC.h}&dob=${dob}&goalDate=${goalDate}`;
     };
 
     const copyFinalUrl = () => {
@@ -115,23 +104,7 @@ export default function Home() {
                                             </div>
                                         )}
 
-                                        <div className="space-y-4">
-                                            <label className="text-sm font-medium text-neutral-400">iPhone Model</label>
-                                            <div className="relative">
-                                                <select
-                                                    value={device}
-                                                    onChange={(e) => setDevice(e.target.value)}
-                                                    className="w-full bg-[#111] border border-neutral-800 rounded-xl p-4 text-[15px] font-medium outline-none focus:border-neutral-500 transition-colors cursor-pointer appearance-none pr-10"
-                                                >
-                                                    {IPHONE_MODELS.map(m => (
-                                                        <option key={m.id} value={m.id}>{m.name}</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500">
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        {/* Model selection removed to focus on iPhone 6 */}
                                     </div>
                                 </div>
 
@@ -268,27 +241,28 @@ function Input({ label, value, onChange, placeholder }: any) {
 
 function IPhoneMockup({ src }: { src: string }) {
     return (
-        <div className="relative w-[260px] aspect-[9/18.5] shadow-2xl select-none">
-            <div className="absolute top-[90px] -left-[4px] w-[3px] h-[35px] bg-[#1a1a1a] rounded-l-sm z-0" />
-            <div className="absolute top-[135px] -left-[4px] w-[3px] h-[35px] bg-[#1a1a1a] rounded-l-sm z-0" />
-            <div className="absolute top-[120px] -right-[4px] w-[3px] h-[75px] bg-[#1a1a1a] rounded-r-sm z-0" />
-            <div className="absolute inset-0 rounded-[44px] border-[7px] border-[#1c1c1e] z-30 pointer-events-none shadow-[inset_0_0_2px_1px_rgba(255,255,255,0.05)]" />
-            <div className="absolute -inset-[2.5px] rounded-[48px] border-[1.5px] border-[#3a3a3c]/30 z-20 pointer-events-none" />
-            <div className="absolute inset-[7px] rounded-[38px] overflow-hidden bg-black z-10">
+        <div className="relative w-[240px] aspect-[750/1334] shadow-2xl select-none mx-auto">
+            {/* Side Buttons */}
+            <div className="absolute top-[80px] -right-[3px] w-[3px] h-[55px] bg-[#1a1a1a] rounded-r-sm z-0" /> {/* Power for iPhone 6 */}
+            <div className="absolute top-[80px] -left-[3px] w-[3px] h-[35px] bg-[#1a1a1a] rounded-l-sm z-0" /> {/* Vol Up */}
+            <div className="absolute top-[125px] -left-[3px] w-[3px] h-[35px] bg-[#1a1a1a] rounded-l-sm z-0" /> {/* Vol Down */}
+
+            <div className="absolute inset-0 rounded-[40px] border-[6px] border-[#1c1c1e] z-30 pointer-events-none" />
+
+            <div className="absolute inset-[6px] rounded-[34px] overflow-hidden bg-black z-10">
                 {src && <Image src={src} alt="Preview" fill className="object-cover opacity-100" unoptimized />}
-                <div className="absolute inset-0 z-20 pointer-events-none flex flex-col items-center pt-12">
-                    <div className="text-[10px] font-semibold text-white/50 tracking-wider mb-1 px-1">Wed Dec 31</div>
-                    <div className="text-[72px] font-semibold tracking-tighter text-white/90 leading-[0.9]">08:00</div>
-                    <div className="absolute top-[13px] left-1/2 -translate-x-1/2 w-[30%] h-[24px] bg-black rounded-full" />
-                    <div className="absolute bottom-10 left-8 h-10 w-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
-                        <div className="w-1.5 h-4 bg-white/40 rounded-full" />
-                    </div>
-                    <div className="absolute bottom-10 right-8 h-10 w-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
-                        <div className="w-5 h-4 bg-white/40 rounded-[2px]" />
-                    </div>
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[35%] h-[4px] bg-white/30 rounded-full" />
+                <div className="absolute inset-0 z-20 pointer-events-none flex flex-col items-center pt-24 text-white">
+                    <div className="text-[12px] font-medium tracking-wide mb-1 opacity-90">Wed Dec 31</div>
+                    <div className="text-[64px] font-thin tracking-tighter leading-[0.9] mb-4">08:00</div>
+
+                    {/* No Dynamic Island/Notch for iPhone 6 */}
+
+                    <div className="absolute bottom-[40px] left-1/2 -translate-x-1/2 text-xs opacity-40">Press Home to unlock</div>
                 </div>
             </div>
+
+            {/* Home Button Mock */}
+            <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full border border-neutral-800" />
         </div>
     );
 }

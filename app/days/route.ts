@@ -5,32 +5,9 @@ import { getLifeInWeeks, getYearProgress, getGoalProgress, CalendarType } from '
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export type DeviceId =
-    | 'iphone_6_8' | 'iphone_6_8_plus'
-    | 'iphone_x_11pro' | 'iphone_xr_11' | 'iphone_xsmax_11promax'
-    | 'iphone_12_14' | 'iphone_12_14_max'
-    | 'iphone_14_15_pro' | 'iphone_14_15_promax';
+const IPHONE_6_SPEC = { width: 750, height: 1334, offsetTop: 420 }; // Increased offset to clear clock completely
 
-interface DeviceSpecs {
-    width: number;
-    height: number;
-    offsetTop: number;
-    era: 'home' | 'notch' | 'island';
-}
-
-const DEVICE_CONFIGS: Record<DeviceId, DeviceSpecs> = {
-    iphone_6_8: { width: 750, height: 1334, offsetTop: 350, era: 'home' },
-    iphone_6_8_plus: { width: 1242, height: 2208, offsetTop: 500, era: 'home' },
-    iphone_x_11pro: { width: 1125, height: 2436, offsetTop: 700, era: 'notch' },
-    iphone_xr_11: { width: 828, height: 1792, offsetTop: 500, era: 'notch' },
-    iphone_xsmax_11promax: { width: 1242, height: 2688, offsetTop: 750, era: 'notch' },
-    iphone_12_14: { width: 1170, height: 2532, offsetTop: 750, era: 'notch' },
-    iphone_12_14_max: { width: 1284, height: 2778, offsetTop: 850, era: 'notch' },
-    iphone_14_15_pro: { width: 1179, height: 2556, offsetTop: 850, era: 'island' },
-    iphone_14_15_promax: { width: 1290, height: 2796, offsetTop: 950, era: 'island' },
-};
-
-function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string {
+function generateSVG(type: CalendarType, data: any, specs: { width: number, height: number, offsetTop: number }): string {
     const { width, height, offsetTop } = specs;
 
     const palettes = {
@@ -40,8 +17,8 @@ function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string 
     };
 
     const p = palettes[type] || palettes.life;
-    const paddingBottom = height * 0.15;
-    const contentWidth = width * 0.90;
+    const paddingBottom = height * 0.15; // Increased padding for safer bottom clear
+    const contentWidth = width * 0.88;   // Reduced width to ensure no edge cutting
     const contentHeight = height - offsetTop - paddingBottom;
 
     let svgContent = '';
@@ -67,7 +44,7 @@ function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string 
     if (type === 'life') {
         const rows = 80;
         const cols = 52;
-        const gap = (width > 1000) ? 6 : 3;
+        const gap = 3;
 
         // Calculate size to fit BOTH width and height
         const availableW = contentWidth - (cols - 1) * gap;
@@ -93,7 +70,7 @@ function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string 
     } else if (type === 'year') {
         const cols = 15;
         const rows = 25;
-        const gap = (width > 1000) ? 10 : 5;
+        const gap = 6;
 
         // Calculate size to fit BOTH width and height
         const availableW = contentWidth - (cols - 1) * gap;
@@ -113,9 +90,9 @@ function generateSVG(type: CalendarType, data: any, specs: DeviceSpecs): string 
             const y = gridY + row * (cellSize + gap);
             const isElapsed = i < data.elapsed;
             const color = isElapsed ? p.primary : '#1c1c1e';
-            svgContent += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="${cellSize / 4}" fill="${color}" opacity="${isElapsed ? 1 : 0.4}" ${isElapsed && i % 40 === 0 ? 'filter="url(#soft-glow)"' : ''} />`;
+            svgContent += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="${cellSize / 4}" fill="${color}" opacity="${isElapsed ? 1 : 0.4}" ${isElapsed && i % 10 === 0 ? 'filter="url(#soft-glow)"' : ''} />`;
         }
-        svgContent += `<text x="${width / 2}" y="${gridY - (width / 15)}" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="900" font-size="${width / 11}" fill="white" letter-spacing="-1">${data.label}</text>`;
+        svgContent += `<text x="${width / 2}" y="${gridY - (width / 10)}" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="900" font-size="${width / 9}" fill="white" letter-spacing="-1">${data.label}</text>`;
     } else if (type === 'goal') {
         const cx = width / 2;
         const cy = offsetTop + contentHeight / 2;
@@ -146,20 +123,8 @@ export async function GET(request: NextRequest) {
     const dob = searchParams.get('dob');
     const goalDate = searchParams.get('goalDate');
 
-    // Explicit Width/Height support
-    const reqWidth = parseInt(searchParams.get('width') || '0');
-    const reqHeight = parseInt(searchParams.get('height') || '0');
-
-    // Fallback to device logic
-    const deviceId = (searchParams.get('device') as DeviceId) || 'iphone_14_15_promax';
-    const deviceSpecs = DEVICE_CONFIGS[deviceId] || DEVICE_CONFIGS.iphone_14_15_promax;
-
-    const specs: DeviceSpecs = {
-        width: reqWidth || deviceSpecs.width,
-        height: reqHeight || deviceSpecs.height,
-        offsetTop: deviceSpecs.offsetTop, // In a real app we'd calculate this based on aspect ratio/era
-        era: deviceSpecs.era
-    };
+    // Hardcode stats for iPhone 6 for "best" focus
+    const specs = IPHONE_6_SPEC;
 
     try {
         let data;
