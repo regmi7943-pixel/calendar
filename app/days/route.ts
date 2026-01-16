@@ -18,7 +18,7 @@ function generateSVG(type: CalendarType, data: any, specs: { width: number, heig
 
     const p = palettes[type] || palettes.life;
     const paddingBottom = height * 0.20; // Room for footer labels
-    const contentWidth = width * 0.97;   // 10% bigger width-wise (0.88 -> 0.97)
+    const contentWidth = width * 0.98;   // Maximum safe width for iPhone 6 (0.97 -> 0.98)
     const contentHeight = height - offsetTop - paddingBottom;
 
     let svgContent = '';
@@ -70,7 +70,7 @@ function generateSVG(type: CalendarType, data: any, specs: { width: number, heig
     } else if (type === 'year') {
         const cols = 15;
         const rows = 25;
-        const gap = 7; // Adjusted for slightly larger grid
+        const gap = 6; // Reduced slightly to allow bigger cells with the new width
 
         // Calculate size to fit BOTH width and height
         const availableW = contentWidth - (cols - 1) * gap;
@@ -93,15 +93,13 @@ function generateSVG(type: CalendarType, data: any, specs: { width: number, heig
             svgContent += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="${cellSize / 4}" fill="${color}" opacity="${isElapsed ? 1 : 0.4}" ${isElapsed && i % 10 === 0 ? 'filter="url(#soft-glow)"' : ''} />`;
         }
 
-        // Year Label
+        // Year Label (Header)
         svgContent += `<text x="${width / 2}" y="${gridY - (width / 10)}" text-anchor="middle" font-family="-apple-system, sans-serif" font-weight="900" font-size="${width / 9}" fill="white" letter-spacing="-1">${data.label}</text>`;
 
-        // Footer Labels
-        const currentYear = new Date().getFullYear();
-        const nextYear = currentYear + 1;
+        // Footer Labels (Progress tracking)
         svgContent += `
-            <text x="${gridX}" y="${gridY + actualH + 60}" text-anchor="start" font-family="-apple-system, sans-serif" font-weight="700" font-size="${width / 24}" fill="rgba(255,255,255,0.4)" letter-spacing="1">${data.elapsed} DAYS GONE IN ${currentYear}</text>
-            <text x="${gridX + actualW}" y="${gridY + actualH + 60}" text-anchor="end" font-family="-apple-system, sans-serif" font-weight="700" font-size="${width / 24}" fill="rgba(255,255,255,0.4)" letter-spacing="1">${data.remaining} DAYS LEFT TILL ${nextYear}</text>
+            <text x="${gridX}" y="${gridY + actualH + 60}" text-anchor="start" font-family="-apple-system, sans-serif" font-weight="700" font-size="${width / 36}" fill="rgba(255,255,255,0.4)" letter-spacing="1">${data.elapsed} DAYS GONE</text>
+            <text x="${gridX + actualW}" y="${gridY + actualH + 60}" text-anchor="end" font-family="-apple-system, sans-serif" font-weight="700" font-size="${width / 36}" fill="rgba(255,255,255,0.4)" letter-spacing="1">${data.remaining} DAYS LEFT</text>
         `;
     } else if (type === 'goal') {
         const cx = width / 2;
