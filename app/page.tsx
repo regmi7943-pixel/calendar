@@ -6,15 +6,15 @@ import { useState, useEffect } from "react";
 type CalendarType = 'life' | 'year' | 'goal';
 
 const IPHONE_MODELS = [
-    { id: 'iphone_14_15_promax', name: 'iPhone 15 / 15 Pro / 16' },
-    { id: 'iphone_14_15_pro', name: 'iPhone 14 / 15' },
-    { id: 'iphone_12_14_max', name: 'iPhone 12 / 13 / 14 Pro Max' },
-    { id: 'iphone_12_14', name: 'iPhone 12 / 13 / 14' },
-    { id: 'iphone_xsmax_11promax', name: 'iPhone XS Max / 11 Pro Max' },
-    { id: 'iphone_xr_11', name: 'iPhone XR / 11' },
-    { id: 'iphone_x_11pro', name: 'iPhone X / XS / 11 Pro' },
-    { id: 'iphone_6_8_plus', name: 'iPhone 6 Plus / 7 Plus / 8 Plus' },
-    { id: 'iphone_6_8', name: 'iPhone 6 / 7 / 8' },
+    { id: 'iphone_14_15_promax', name: 'iPhone 15 / 15 Pro / 16', w: 1290, h: 2796 },
+    { id: 'iphone_14_15_pro', name: 'iPhone 14 / 15', w: 1179, h: 2556 },
+    { id: 'iphone_12_14_max', name: 'iPhone 12 / 13 / 14 Pro Max', w: 1284, h: 2778 },
+    { id: 'iphone_12_14', name: 'iPhone 12 / 13 / 14', w: 1170, h: 2532 },
+    { id: 'iphone_xsmax_11promax', name: 'iPhone XS Max / 11 Pro Max', w: 1242, h: 2688 },
+    { id: 'iphone_xr_11', name: 'iPhone XR / 11', w: 828, h: 1792 },
+    { id: 'iphone_x_11pro', name: 'iPhone X / XS / 11 Pro', w: 1125, h: 2436 },
+    { id: 'iphone_6_8_plus', name: 'iPhone 6 Plus / 7 Plus / 8 Plus', w: 1242, h: 2208 },
+    { id: 'iphone_6_8', name: 'iPhone 6 / 7 / 8', w: 750, h: 1334 },
 ];
 
 export default function Home() {
@@ -41,7 +41,8 @@ export default function Home() {
 
     const getPreviewUrl = (type: CalendarType) => {
         if (!origin) return '';
-        return `${origin}/api/wallpaper?type=${type}&device=${device}&dob=${dob}&goalDate=${goalDate}&theme=dark`;
+        const model = IPHONE_MODELS.find(m => m.id === device) || IPHONE_MODELS[0];
+        return `${origin}/days?type=${type}&width=${model.w}&height=${model.h}&dob=${dob}&goalDate=${goalDate}`;
     };
 
     const copyFinalUrl = () => {
@@ -161,6 +162,17 @@ export default function Home() {
                                     </div>
 
                                     <div className="pl-12 space-y-6">
+                                        {origin.includes('localhost') && (
+                                            <div className="bg-amber-950/30 border border-amber-900/50 p-4 rounded-xl space-y-2">
+                                                <div className="flex items-center gap-2 text-amber-500 font-bold text-sm">
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                    Important Note
+                                                </div>
+                                                <p className="text-amber-200/60 text-xs leading-relaxed">
+                                                    You are currently running on <b>localhost</b>. Shortcuts on your physical iPhone cannot reach this URL. This link will work perfectly once you deploy to Vercel or a public URL.
+                                                </p>
+                                            </div>
+                                        )}
                                         <button
                                             onClick={copyFinalUrl}
                                             className="w-full bg-white text-black font-bold py-5 rounded-2xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-all active:scale-[0.98] shadow-lg"
